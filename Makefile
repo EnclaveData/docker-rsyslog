@@ -3,8 +3,9 @@ include build.env
 BUILD_DATE := $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 export
 
+IMAGE_NAME=722249479844.dkr.ecr.us-east-1.amazonaws.com/rsyslog-kafka
 define docker_tag_latest
-	docker tag jpvriel/rsyslog:$(VERSION) jpvriel/rsyslog:latest
+	docker tag $(IMAGE_NAME):$(VERSION) $(IMAGE_NAME):latest
 endef
 
 build:
@@ -16,6 +17,12 @@ rebuild:
 	$(info ## re-build $(VERSION) ($(BUILD_DATE)).)
 	docker-compose -f docker-compose.yml build --no-cache --pull --build-arg RSYSLOG_VERSION --build-arg VERSION --build-arg BUILD_DATE --build-arg DISABLE_YUM_MIRROR=true --build-arg http_proxy --build-arg https_proxy --build-arg no_proxy
 	$(call docker_tag_latest)
+
+push: build ecr-auth
+	docker push $(IMAGE_NAME):latest
+
+ecr-auth: ## authorize CLI for doing AWS ECR commands / pushes
+	@eval $(CMD_REPOLOGIN)	
 
 build_test:
 	$(info ## build test $(VERSION) ($(BUILD_DATE)).)
@@ -29,7 +36,7 @@ rebuild_test: clean_test
 
 clean: clean_test
 	$(info ## remove $(VERSION).)
-	docker rmi jpvriel/rsyslog:$(VERSION) jpvriel/rsyslog:latest
+	docker rmi $(IMAGE_NAME):$(VERSION) $(IMAGE_NAME):latest
 	#docker image prune -f --filter 'label=org.label-schema.name=rsyslog'
 	#docker system prune -f --filter 'label=org.label-schema.name=rsyslog'
 

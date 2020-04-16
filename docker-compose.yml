@@ -2,7 +2,7 @@ version: '2.2'
 
 services:
   syslog:
-    image: jpvriel/rsyslog:${VERSION:-latest}
+    image: 722249479844.dkr.ecr.us-east-1.amazonaws.com/rsyslog-kafka:${VERSION:-latest}
     build:
       context: .
       args:
@@ -15,6 +15,14 @@ services:
         - DISABLE_YUM_MIRROR
     environment:
       - TZ
+      - rsyslog_omkafka_enabled=on
+      - rsyslog_omkafka_broker=["gilfoyle:9092"]
+      - rsyslog_omkafka_topic=syslog
+      - rsyslog_omkafka_dynaTopic=off
+      - rsyslog_mmjsonparse=on
+      - rsyslog_omfile_enabled=off
+      - rsyslog_support_metadata_formats=on
+      - rsyslog_omkafka_template=TmplJSONMsgAndRawMsg
     volumes:
       - syslog_log:/var/log/remote
       - syslog_work:/var/lib/rsyslog
