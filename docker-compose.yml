@@ -13,6 +13,8 @@ services:
         - ftp_proxy
         - no_proxy
         - DISABLE_YUM_MIRROR
+    ports:
+      - "0.0.0.0:514:514/tcp"
     environment:
       - TZ
       - rsyslog_omkafka_enabled=on
